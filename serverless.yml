@@ -1,0 +1,19 @@
+component: website
+name: feishu-h5-app
+inputs:
+  src:
+    src: ./
+    dist: ./
+  region: ap-guangzhou
+  bucketName: feishu-h5-app-123456789
+  protocols:
+    - https
+  cors:
+    - allowedOrigin: '*'
+      allowedMethod: GET, POST, PUT, DELETE, OPTIONS
+      allowedHeader: '*'
+      maxAge: 3600
+  staticWebsite:
+    index: index.html
+    error: index.html
+    gzip: true

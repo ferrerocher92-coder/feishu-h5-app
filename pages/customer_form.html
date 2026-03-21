@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>录入客户 - 客户录入助手</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        /* ==================== Form Specific ==================== */
+        .form-row {
+            display: flex;
+            gap: 12px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .form-group-half {
+            flex: 0 0 100px;
+        }
+
+        .country-detected {
+            font-size: 12px;
+            color: #00b42a;
+            margin-top: 4px;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .form-error {
+            font-size: 12px;
+            color: #ff4d4f;
+            margin-top: 4px;
+        }
+
+        .form-section {
+            margin-bottom: 8px;
+        }
+
+        .form-section-title {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* ==================== Photo Upload ==================== */
+        .photo-upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            position: relative;
+        }
+        .photo-upload-area:hover {
+            border-color: var(--primary-color);
+            background: rgba(51, 112, 255, 0.04);
+        }
+        .photo-upload-area.drag-over {
+            border-color: var(--primary-color);
+            background: rgba(51, 112, 255, 0.08);
+        }
+
+        .photo-upload-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        .photo-upload-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .photo-upload-hint {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 4px;
+        }
+        .photo-upload-area input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .photo-preview {
+            position: relative;
+            display: inline-block;
+            margin-top: 12px;
+        }
+        .photo-preview img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+        }
+        .photo-preview-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .photo-clear-btn {
+            padding: 4px 12px;
+            font-size: 13px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+        .photo-clear-btn:hover {
+            border-color: #ff4d4f;
+            color: #ff4d4f;
+        }
+
+        /* ==================== Submit Button ==================== */
+        .submit-btn {
+            margin-top: 24px;
+            position: relative;
+        }
+        .submit-btn .btn {
+            width: 100%;
+        }
+        .submit-btn .btn.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .submit-btn .btn.loading::after {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        /* ==================== Result Message ==================== */
+        .result-msg {
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 16px;
+        }
+        .result-msg.success {
+            background: #f0f9eb;
+            border: 1px solid #b2d8a8;
+            color: #52c41a;
+        }
+        .result-msg.error {
+            background: #fff1f0;
+            border: 1px solid #ffccc7;
+            color: #ff4d4f;
+        }
+        .result-msg.warning {
+            background: #fffbe6;
+            border: 1px solid #ffe58f;
+            color: #faad14;
+        }
+
+        /* ==================== Duplicate Modal ==================== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 16px;
+        }
+        .modal-overlay.hidden {
+            display: none;
+        }
+        .modal-box {
+            background: var(--card-bg);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 420px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            padding: 16px 16px 12px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #faad14;
+        }
+        .modal-body {
+            padding: 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .modal-footer {
+            padding: 12px 16px 16px;
+            display: flex;
+            gap: 12px;
+        }
+        .modal-footer .btn {
+            flex: 1;
+        }
+        .btn-outline {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        .btn-outline:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* ==================== Back Button ==================== */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-bottom: 16px;
+            cursor: pointer;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* ==================== Country Autocomplete ==================== */
+        .country-wrap {
+            position: relative;
+        }
+        .country-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 50;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        .country-suggestions.active {
+            display: block;
+        }
+        .country-suggestion-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .country-suggestion-item:hover {
+            background: rgba(51, 112, 255, 0.08);
+        }
+        .country-suggestion-item .country-code {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="nav-title">录入客户</div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="container">
+            <a class="back-link" onclick="window.customerForm && window.customerForm.goBack()">
+                ← 返回客户列表
+            </a>
+
+            <div class="card">
+                <form id="customerForm" novalidate>
+                    <!-- 公司信息 -->
+                    <div class="form-section">
+                        <div class="form-section-title">基本信息</div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="company">公司名称 <span style="color:#ff4d4f">*</span></label>
+                            <input type="text" id="company" name="company" class="form-input"
+                                placeholder="请输入公司名称" maxlength="100" autocomplete="organization">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="contact">联系人</label>
+                            <input type="text" id="contact" name="contact" class="form-input"
+                                placeholder="请输入联系人姓名" maxlength="50" autocomplete="name">
+                        </div>
+                    </div>
+
+                    <!-- 联系方式 -->
+                    <div class="form-section">
+                        <div class="form-section-title">联系方式</div>
+
+                        <div class="form-row">
+                            <div class="form-group form-group-half">
+                                <label class="form-label" for="countryCode">国家代码</label>
+                                <input type="text" id="countryCode" name="countryCode" class="form-input"
+                                    placeholder="+86" maxlength="6" autocomplete="tel-country-code">
+                                <div id="detectedCountry" class="country-detected" style="display:none;"></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="phone">电话</label>
+                                <input type="tel" id="phone" name="phone" class="form-input"
+                                    placeholder="请输入电话号码" maxlength="20" autocomplete="tel-national">
+                                <div id="phoneWarn" class="form-error" style="display:none;"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="email">邮箱</label>
+                            <input type="email" id="email" name="email" class="form-input"
+                                placeholder="请输入邮箱地址" maxlength="100" autocomplete="email">
+                            <div id="emailWarn" class="form-error" style="display:none;"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="address">地址</label>
+                            <input type="text" id="address" name="address" class="form-input"
+                                placeholder="请输入详细地址" maxlength="200" autocomplete="street-address">
+                        </div>
+
+                        <div class="form-group country-wrap">
+                            <label class="form-label" for="country">国家</label>
+                            <input type="text" id="country" name="country" class="form-input"
+                                placeholder="输入国家代码自动填充，或手动输入" autocomplete="country-name">
+                            <div id="countrySuggestions" class="country-suggestions"></div>
+                        </div>
+                    </div>
+
+                    <!-- 名片照片 -->
+                    <div class="form-section">
+                        <div class="form-section-title">名片照片（可选）</div>
+                        <div id="photoUploadArea" class="photo-upload-area">
+                            <div class="photo-upload-icon">📷</div>
+                            <div class="photo-upload-text">点击拍摄或选择名片照片</div>
+                            <div class="photo-upload-hint">支持拍照或从相册选择</div>
+                            <input type="file" id="photoInput" name="photo" accept="image/*" capture="environment">
+                        </div>
+                        <div id="photoError" class="photo-error" style="display:none; color: #cf1322; font-size: 13px; margin-top: 6px; padding: 0 4px;"></div>
+                        <div id="photoPreview" class="photo-preview" style="display:none;">
+                            <img id="previewImg" src="" alt="名片预览">
+                            <div class="photo-preview-actions">
+                                <button type="button" class="photo-clear-btn" onclick="window.customerForm.clearPhoto()">删除照片</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 提交按钮 -->
+                    <div class="submit-btn">
+                        <button type="submit" id="submitBtn" class="btn btn-primary">
+                            提交客户信息
+                        </button>
+                    </div>
+
+                    <!-- 结果消息 -->
+                    <div id="resultMsg" class="result-msg" style="display:none;"></div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- 重复确认弹窗 -->
+    <div id="duplicateModal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span style="font-size:20px;">⚠️</span>
+                <span class="modal-title">公司名称重复</span>
+            </div>
+            <div class="modal-body" id="duplicateContent"></div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="window.customerForm.cancelDuplicate()">取消</button>
+                <button class="btn btn-primary" onclick="window.customerForm.confirmDuplicate()">仍要添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- 【修改 - 2026-03-21】config.js 必须在 customer_form.js 之前加载 -->
+    <script src="../js/config.js"></script>
+    <script src="../js/customer_form.js"></script>
+</body>
+</html>

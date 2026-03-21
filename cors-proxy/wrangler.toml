@@ -1,0 +1,7 @@
+name = "feishu-cors-proxy"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+# 可选：设置允许的来源域名（生产环境建议设置具体域名）
+ALLOWED_ORIGIN = "*"

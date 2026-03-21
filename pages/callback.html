@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>登录中 - 客户录入助手</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .callback-container {
+            text-align: center;
+            padding: 40px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            max-width: 360px;
+            width: 90%;
+        }
+        
+        .callback-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        .callback-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .callback-message {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+        
+        .callback-error {
+            color: #ff4d4f;
+            padding: 12px;
+            background: #fff2f0;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .callback-btn {
+            padding: 10px 24px;
+            font-size: 14px;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 4px;
+        }
+        
+        .callback-btn:hover {
+            background: var(--primary-hover);
+        }
+        
+        .callback-btn.secondary {
+            background: #f5f5f5;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="callback-container">
+        <div id="callbackIcon" class="callback-icon">⏳</div>
+        <h2 id="callbackTitle" class="callback-title">登录中...</h2>
+        <p id="callbackMessage" class="callback-message">正在验证您的身份，请稍候</p>
+        <div id="errorContainer" style="display: none;" class="callback-error"></div>
+        <div id="callbackActions" style="display: none;">
+            <button class="callback-btn" onclick="retryLogin()">重试</button>
+            <button class="callback-btn secondary" onclick="goToLogin()">返回登录</button>
+        </div>
+    </div>
+
+    <!-- 【修改 - 2026-03-21】config.js 必须在 auth.js 之前加载 -->
+    <script src="../js/config.js"></script>
+    <script>
+        // 【修改 - 2026-03-21】动态设置 <base href>，支持多环境部署
+        applyBaseHref();
+    </script>
+    <script src="../js/auth.js"></script>
+    <script>
+        // 【修改 - 2026-03-21】app_secret 改为从 CONFIG 读取（config.js 中定义）
+        // 删除了原来的 window.feishuAppSecret 硬编码
+
+        async function handleCallback() {
+            const result = await Auth.handleCallback();
+
+            if (result.success) {
+                document.getElementById('callbackIcon').textContent = '✅';
+                document.getElementById('callbackTitle').textContent = '登录成功';
+                document.getElementById('callbackMessage').textContent = '正在跳转...';
+                
+                // 【修改 - 2026-03-21】跳转地址使用 CONFIG.APP_BASE 动态生成
+                setTimeout(() => {
+                    window.location.href = resolveUrl('../index.html');
+                }, 500);
+            } else {
+                document.getElementById('callbackIcon').textContent = '❌';
+                document.getElementById('callbackTitle').textContent = '登录失败';
+                document.getElementById('callbackMessage').textContent = '';
+                document.getElementById('errorContainer').style.display = 'block';
+                document.getElementById('errorContainer').textContent = result.error;
+                document.getElementById('callbackActions').style.display = 'block';
+            }
+        }
+
+        function retryLogin() {
+            Auth.login();
+        }
+
+        function goToLogin() {
+            Auth.clearAuth();
+            // 【修改 - 2026-03-21】使用 CONFIG.APP_BASE 动态跳转
+            window.location.href = resolveUrl('login.html');
+        }
+
+        // Execute callback handler on page load
+        handleCallback();
+    </script>
+</body>
+</html>

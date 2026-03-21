@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>客户列表</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* ===== Page Layout ===== */
+    body { background: #f5f5f5; }
+    .page { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ===== Nav Bar ===== */
+    .nav-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 44px; padding: 0 16px; background: #fff;
+      border-bottom: 1px solid #e8e8e8; position: fixed;
+      top: 0; left: 0; right: 0; z-index: 100;
+    }
+    .nav-back { width: 44px; height: 44px; display: flex; align-items: center; cursor: pointer; }
+    .nav-arrow { font-size: 22px; color: #333; }
+    .nav-title { font-size: 17px; font-weight: 600; color: #333; }
+    .nav-right { width: 44px; }
+    .nav-actions { display: flex; gap: 16px; align-items: center; }
+    .nav-btn-text { font-size: 15px; padding: 4px 8px; cursor: pointer; }
+    .nav-btn-text.blue { color: #007aff; }
+    .nav-btn-text.red { color: #ff3b30; }
+
+    /* ===== Search Bar ===== */
+    .search-section {
+      padding: 12px 16px; background: #fff;
+      position: fixed; top: 44px; left: 0; right: 0; z-index: 99;
+    }
+    .search-bar {
+      display: flex; align-items: center; background: #f0f0f0;
+      border-radius: 8px; padding: 0 12px; height: 38px;
+    }
+    .search-icon { font-size: 14px; margin-right: 8px; }
+    .search-input {
+      flex: 1; font-size: 15px; color: #333; background: transparent;
+      border: none; outline: none;
+    }
+    .search-clear { padding: 4px; margin-left: 6px; cursor: pointer; }
+    .clear-icon { font-size: 12px; color: #999; }
+
+    /* ===== Action Bar (below search) ===== */
+    .action-bar {
+      padding: 10px 16px 6px; background: #fff;
+      display: flex; justify-content: space-between; align-items: center;
+      position: fixed; top: 96px; left: 0; right: 0; z-index: 98;
+    }
+    .record-count { font-size: 13px; color: #999; }
+    .btn-add-customer {
+      font-size: 13px; color: #007aff; cursor: pointer;
+      display: flex; align-items: center; gap: 4px;
+    }
+
+    /* ===== List Container ===== */
+    .list-container {
+      flex: 1; margin-top: 0; padding-top: 140px; padding-bottom: 20px;
+    }
+
+    /* ===== Loading ===== */
+    .loading-area, .empty-area {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 60px 0;
+    }
+    .loading-text { font-size: 14px; color: #999; }
+    .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-text { font-size: 15px; color: #999; text-align: center; }
+    .spinner {
+      width: 32px; height: 32px; border: 3px solid #e8e8e8;
+      border-top-color: #007aff; border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin-bottom: 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== Customer Card ===== */
+    .customer-card {
+      display: flex; align-items: center; background: #fff;
+      margin: 0 16px 10px; border-radius: 10px;
+      padding: 14px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      cursor: pointer; transition: background 0.15s;
+    }
+    .customer-card:active { background: #f0f0f0; }
+    .card-main { flex: 1; }
+    .card-company {
+      font-size: 16px; font-weight: 600; color: #222;
+      margin-bottom: 8px; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
+    }
+    .card-row { display: flex; align-items: center; margin-bottom: 4px; }
+    .card-label { font-size: 13px; color: #999; width: 44px; flex-shrink: 0; }
+    .card-value { font-size: 13px; color: #555; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .card-arrow { font-size: 22px; color: #ccc; margin-left: 10px; flex-shrink: 0; }
+
+    /* ===== Load More ===== */
+    .load-more { display: flex; justify-content: center; padding: 16px 0; }
+    .load-more-text { font-size: 13px; color: #999; }
+
+    /* ===== Refresh Button ===== */
+    .btn-refresh {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; color: #007aff; cursor: pointer;
+      padding: 4px 0;
+    }
+
+    /* ===== Detail Page ===== */
+    .detail-page { min-height: 100vh; background: #f5f5f5; padding-top: 44px; }
+    .detail-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 44px; padding: 0 16px; background: #fff;
+      border-bottom: 1px solid #e8e8e8; position: fixed;
+      top: 0; left: 0; right: 0; z-index: 200;
+    }
+    .detail-nav-back { width: 44px; height: 44px; display: flex; align-items: center; cursor: pointer; }
+    .detail-nav-title { font-size: 17px; font-weight: 600; color: #333; }
+    .detail-nav-actions { display: flex; gap: 16px; align-items: center; }
+    .detail-nav-btn { font-size: 15px; padding: 4px 8px; cursor: pointer; }
+    .detail-nav-btn.edit-btn { color: #007aff; }
+    .detail-nav-btn.delete-btn { color: #ff3b30; }
+    .detail-content { padding-top: 60px; }
+    .detail-section {
+      background: #fff; margin: 12px 16px; border-radius: 10px; padding: 16px;
+    }
+    .detail-section-title {
+      font-size: 13px; color: #999; margin-bottom: 12px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .detail-row {
+      display: flex; align-items: flex-start; padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { font-size: 14px; color: #999; width: 70px; flex-shrink: 0; }
+    .detail-value { font-size: 14px; color: #222; flex: 1; word-break: break-all; }
+    .btn-view-card {
+      margin-top: 16px; background: #007aff; color: #fff;
+      font-size: 15px; border-radius: 8px; padding: 12px 0;
+      text-align: center; font-weight: 500; cursor: pointer;
+      border: none; width: 100%;
+    }
+    .btn-view-card:active { background: #0062cc; }
+    .btn-view-card-disabled {
+      background: #e0e0e0; color: #999; cursor: not-allowed;
+    }
+    .btn-view-card-disabled:active { background: #e0e0e0; }
+
+    /* ===== Edit Page ===== */
+    .edit-page { min-height: 100vh; background: #f5f5f5; padding-top: 44px; }
+    .edit-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 44px; padding: 0 16px; background: #fff;
+      border-bottom: 1px solid #e8e8e8; position: fixed;
+      top: 0; left: 0; right: 0; z-index: 200;
+    }
+    .edit-nav-back { width: 44px; height: 44px; display: flex; align-items: center; cursor: pointer; }
+    .edit-nav-title { font-size: 17px; font-weight: 600; color: #333; }
+    .edit-nav-actions { display: flex; gap: 16px; align-items: center; }
+    .edit-nav-btn { font-size: 15px; padding: 4px 8px; cursor: pointer; }
+    .edit-nav-btn.save-btn { color: #007aff; }
+    .edit-nav-btn.cancel-btn { color: #999; }
+    .edit-nav-btn.saving-btn { color: #999; }
+    .edit-content { padding: 16px; padding-top: 60px; }
+    .edit-section { background: #fff; border-radius: 10px; overflow: hidden; }
+    .edit-item {
+      display: flex; align-items: center; padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .edit-item:last-child { border-bottom: none; }
+    .edit-label { font-size: 15px; color: #333; width: 80px; flex-shrink: 0; }
+    .edit-input {
+      flex: 1; font-size: 15px; color: #222; text-align: right;
+      border: none; background: transparent; outline: none;
+    }
+    .edit-item-phone {
+      display: flex; flex-direction: column; align-items: flex-start;
+      padding: 12px 16px; border-bottom: 1px solid #f0f0f0;
+    }
+    .edit-item-phone .edit-label { width: auto; margin-bottom: 8px; }
+    .phone-row { display: flex; align-items: center; gap: 10px; flex: 1; width: 100%; }
+    .country-code-wrap { flex: 0 0 80px; display: flex; flex-direction: column; }
+    .country-code-input {
+      font-size: 15px; color: #1f2329; padding: 6px 0; border: none;
+      outline: none; background: transparent; line-height: 1.5;
+      text-align: center; border-bottom: 2px solid #d3d6db; width: 100%;
+    }
+    .country-code-input:focus { border-bottom-color: #1654d2; }
+    .phone-divider { width: 1px; height: 24px; background: #d3d6db; flex-shrink: 0; }
+    .phone-input {
+      flex: 1; font-size: 15px; color: #1f2329; padding: 6px 0;
+      border: none; outline: none; background: transparent; line-height: 1.5;
+    }
+    .country-hint {
+      display: flex; align-items: center; gap: 3px; margin-top: 4px;
+      opacity: 0; transition: opacity 0.3s; height: 0; overflow: hidden;
+    }
+    .country-hint-visible { opacity: 1; height: auto; }
+    .country-hint-icon { font-size: 12px; }
+    .country-hint-text { font-size: 11px; color: #1654d2; font-weight: 500; }
+    .edit-label-hint { font-size: 11px; color: #b8bcc2; font-weight: 400; }
+
+    /* ===== Edit Page Save Button ===== */
+    .btn-save-edit {
+      margin: 20px 16px 0; background: #007aff; color: #fff;
+      font-size: 16px; border-radius: 8px; padding: 14px 0;
+      text-align: center; font-weight: 500; cursor: pointer; border: none; width: calc(100% - 32px);
+    }
+    .btn-save-edit:active { background: #0062cc; }
+    .btn-save-edit:disabled { background: #a0cfff; cursor: not-allowed; }
+
+    /* ===== Modal ===== */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: #fff; border-radius: 14px; width: 280px;
+      overflow: hidden; transform: scale(0.9);
+      transition: transform 0.2s;
+    }
+    .modal-overlay.active .modal-box { transform: scale(1); }
+    .modal-title { font-size: 17px; font-weight: 600; color: #333; padding: 20px 20px 12px; text-align: center; }
+    .modal-body { font-size: 14px; color: #666; padding: 0 20px 20px; text-align: center; line-height: 1.5; }
+    .modal-actions { border-top: 1px solid #e8e8e8; display: flex; }
+    .modal-btn {
+      flex: 1; padding: 14px 0; text-align: center; font-size: 17px;
+      cursor: pointer; border: none; background: #fff;
+    }
+    .modal-btn:not(:last-child) { border-right: 1px solid #e8e8e8; }
+    .modal-btn.cancel { color: #999; }
+    .modal-btn.confirm { color: #ff3b30; font-weight: 600; }
+    .modal-btn.confirm.blue { color: #007aff; }
+
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.75); color: #fff; font-size: 14px;
+      padding: 10px 20px; border-radius: 8px; z-index: 9999;
+      max-width: 280px; text-align: center; pointer-events: none;
+      opacity: 0; transition: opacity 0.25s;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ===== Lightbox ===== */
+    .lightbox {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.9); z-index: 3000;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    }
+    .lightbox.active { opacity: 1; pointer-events: all; }
+    .lightbox img { max-width: 95vw; max-height: 95vh; object-fit: contain; border-radius: 4px; }
+    .lightbox-close {
+      position: absolute; top: 20px; right: 20px; font-size: 28px;
+      color: #fff; cursor: pointer; width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .lightbox-hint {
+      position: absolute; bottom: 20px; left: 0; right: 0; text-align: center;
+      font-size: 13px; color: rgba(255,255,255,0.6);
+    }
+
+    /* ===== View transitions ===== */
+    .view { display: none; }
+    .view.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="page" id="app">
+
+    <!-- ==================== LIST VIEW ==================== -->
+    <div id="listView" class="view active">
+      <nav class="nav-bar">
+        <div class="nav-back" onclick="goBackList()">
+          <span class="nav-arrow">←</span>
+        </div>
+        <div class="nav-title">客户列表</div>
+        <div class="nav-actions">
+          <div class="btn-refresh" onclick="refreshRecords()">
+            <span id="refreshIcon">🔄</span>
+            <span>刷新</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="search-section">
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input
+            id="searchInput"
+            class="search-input"
+            type="text"
+            placeholder="搜索公司名称或联系人..."
+            oninput="onSearchInput(event)"
+            onkeydown="onSearchKeydown(event)"
+          />
+          <div id="searchClear" class="search-clear" onclick="clearSearch()" style="display:none;">
+            <span class="clear-icon">✕</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <span id="recordCount" class="record-count">加载中...</span>
+        <!-- 【修改 - 2026-03-21】href 改为动态生成（js/config.js 提供 resolveUrl） -->
+        <!-- 注意：实际入口通过 JS 跳转实现，这里 href 保留作为降级 -->
+        <!-- 【Bug1修复 - 2026-03-21】add_customer.html 不存在，改为 customer_form.html -->
+        <a id="addCustomerLink" href="customer_form.html" class="btn-add-customer">＋ 添加客户</a>
+      </div>
+
+      <div class="list-container" id="listContainer">
+        <div id="loadingArea" class="loading-area">
+          <div class="spinner"></div>
+          <div class="loading-text">加载中...</div>
+        </div>
+        <div id="emptyArea" class="empty-area" style="display:none;">
+          <div class="empty-icon">📋</div>
+          <div id="emptyText" class="empty-text">暂无客户记录</div>
+        </div>
+        <div id="customerList"></div>
+        <div id="loadMore" class="load-more" style="display:none;">
+          <div id="loadMoreText" class="load-more-text">加载中...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== DETAIL VIEW ==================== -->
+    <div id="detailView" class="view">
+      <div class="detail-page">
+        <div class="detail-nav">
+          <div class="detail-nav-back" onclick="goBackDetail()">
+            <span class="nav-arrow">←</span>
+          </div>
+          <div class="detail-nav-title">客户详情</div>
+          <div class="detail-nav-actions">
+            <span class="detail-nav-btn edit-btn" onclick="startEdit()">编辑</span>
+            <span class="detail-nav-btn delete-btn" onclick="confirmDelete()">删除</span>
+          </div>
+        </div>
+        <div class="detail-content">
+          <div class="detail-section">
+            <div class="detail-section-title">基本信息</div>
+            <div id="detailRows"></div>
+            <button
+              id="btnViewCard"
+              class="btn-view-card btn-view-card-disabled"
+              onclick="viewCardPhoto()"
+              disabled
+            >查看名片</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== EDIT VIEW ==================== -->
+    <div id="editView" class="view">
+      <div class="edit-page">
+        <div class="edit-nav">
+          <div class="edit-nav-back" onclick="cancelEdit()">
+            <span class="nav-arrow">←</span>
+          </div>
+          <div class="edit-nav-title">编辑客户</div>
+          <div class="edit-nav-actions">
+            <span id="editSaveBtn" class="edit-nav-btn save-btn" onclick="saveEdit()">保存</span>
+          </div>
+        </div>
+        <div class="edit-content">
+          <div class="edit-section">
+            <div class="edit-item">
+              <label class="edit-label">公司名称</label>
+              <input id="edit_company" class="edit-input" type="text" placeholder="请输入公司名称" oninput="onEditInput('公司名称', event)"/>
+            </div>
+            <div class="edit-item">
+              <label class="edit-label">联系人</label>
+              <input id="edit_contact" class="edit-input" type="text" placeholder="请输入联系人" oninput="onEditInput('联系人', event)"/>
+            </div>
+            <div class="edit-item edit-item-phone">
+              <label class="edit-label">电话 <span class="edit-label-hint">(区号+号码)</span></label>
+              <div class="phone-row">
+                <div class="country-code-wrap">
+                  <input id="edit_countryCode" class="country-code-input" type="text" placeholder="+86"
+                    maxlength="5" oninput="onEditCountryCodeInput(event)"/>
+                  <div id="editCountryHint" class="country-hint">
+                    <span class="country-hint-icon">🌏</span>
+                    <span id="editCountryHintText" class="country-hint-text"></span>
+                  </div>
+                </div>
+                <div class="phone-divider"></div>
+                <input id="edit_phone" class="phone-input" type="tel" placeholder="请输入本地号码" oninput="onEditPhoneInput(event)"/>
+              </div>
+            </div>
+            <div class="edit-item">
+              <label class="edit-label">邮箱</label>
+              <input id="edit_email" class="edit-input" type="email" placeholder="请输入邮箱" oninput="onEditInput('邮箱', event)"/>
+            </div>
+            <div class="edit-item">
+              <label class="edit-label">地址</label>
+              <input id="edit_address" class="edit-input" type="text" placeholder="请输入地址" oninput="onEditInput('地址', event)"/>
+            </div>
+            <div class="edit-item">
+              <label class="edit-label">国家</label>
+              <input id="edit_country" class="edit-input" type="text" placeholder="请输入国家" oninput="onEditInput('国家', event)"/>
+            </div>
+          </div>
+        </div>
+        <button id="btnSaveEdit" class="btn-save-edit" onclick="saveEdit()">保存</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal (delete confirmation) -->
+  <div id="modalOverlay" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+    <div class="modal-box">
+      <div class="modal-title" id="modalTitle">确认删除</div>
+      <div class="modal-body" id="modalBody">确定要删除该客户记录吗？此操作不可恢复。</div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeModal()">取消</button>
+        <button class="modal-btn confirm" id="modalConfirm" onclick="onModalConfirm()">删除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+    <div class="lightbox-close">✕</div>
+    <img id="lightboxImg" src="" alt="名片照片"/>
+    <div class="lightbox-hint">点击任意处关闭</div>
+  </div>
+
+  <!-- 【修改 - 2026-03-21】config.js 必须在 customer_list.js 之前加载 -->
+  <script src="../js/config.js"></script>
+  <script src="../js/customer_list.js"></script>
+</body>
+</html>

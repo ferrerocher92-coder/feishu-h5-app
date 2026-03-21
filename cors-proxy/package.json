@@ -1,0 +1,13 @@
+{
+  "name": "cors-proxy",
+  "version": "1.0.0",
+  "description": "> Phase 1 交付物：Cloudflare Workers CORS 代理，解决 H5 应用浏览器端调用飞书 Open API 的跨域问题。",
+  "main": "worker.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
