@@ -487,24 +487,3 @@ window.API = {
   STORAGE_KEY_USER_TOKEN,
 };
 
-// 【保留】ES module export（如果后续改用 type="module" 则通过 import 调用）
-export {
-  // Bitable 核心
-  getOrCreateBitable,
-  createCustomerBitable,
-  searchRecords,
-  searchCustomerByCompany,
-  createRecord,
-  updateRecord,
-  deleteRecord,
-  addCustomerRow,
-  // 云盘 & 上传
-  uploadImage,
-  createPhotoFolder,
-  getOrCreatePhotoFolder,
-  // Storage keys（供外部使用）
-  STORAGE_KEY_APP_TOKEN,
-  STORAGE_KEY_TABLE_ID,
-  STORAGE_KEY_PHOTO_FOLDER_TOKEN,
-  STORAGE_KEY_USER_TOKEN,
-};
