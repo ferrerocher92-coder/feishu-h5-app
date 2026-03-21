@@ -18,7 +18,8 @@ const Auth = {
     get APP_ID() { return CONFIG.APP_ID; },
     get REDIRECT_URI() { return CONFIG.REDIRECT_URI; },
     AUTH_URL: 'https://open.feishu.cn/open-apis/authen/v1/authorize',
-    TOKEN_URL: 'https://open.feishu.cn/open-apis/authen/v1/oidc/access_token',
+    // 【安全修复 2026-03-21】TOKEN_URL 改为 SCF 代理，不再直连飞书，避免 APP_SECRET 暴露
+    TOKEN_URL: 'https://1344246142-c7615ig2lb.ap-guangzhou.tencentscf.com/open-apis/authen/v1/oidc/access_token',
     USER_INFO_URL: 'https://open.feishu.cn/open-apis/authen/v1/user_info',
 
     // localStorage keys（与 api.js 的 STORAGE_KEY_USER_TOKEN 保持一致）
@@ -155,7 +156,7 @@ const Auth = {
 
         try {
             // Exchange code for access token
-            // 【修改】app_secret 改为从 CONFIG 读取（CONFIG.APP_SECRET 在 config.js 中定义）
+            // 【安全修复 2026-03-21】不再传 app_secret，由 SCF 代理从环境变量读取
             const tokenResponse = await fetch(this.TOKEN_URL, {
                 method: 'POST',
                 headers: {
@@ -164,8 +165,8 @@ const Auth = {
                 body: JSON.stringify({
                     grant_type: 'authorization_code',
                     code: code,
-                    app_id: this.APP_ID,
-                    app_secret: CONFIG.APP_SECRET
+                    app_id: this.APP_ID
+                    // app_secret 不再传，由 SCF 代理从环境变量 APP_SECRET 读取
                 })
             });
 
