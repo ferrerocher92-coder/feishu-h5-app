@@ -25,7 +25,7 @@
 // =====================
 // 注意：customer_form.html 在加载本脚本之前会先加载 config.js
 const APP_ID     = (window.CONFIG && window.CONFIG.APP_ID)     || 'cli_a9365221543a5ccc';
-const APP_SECRET = (window.CONFIG && window.CONFIG.APP_SECRET)  || 'o08J7194FRXuGPffPICd6cHb6gyKWjBY';
+
 const API_BASE   = (window.CONFIG && window.CONFIG.API_BASE)    || 'https://open.feishu.cn/open-apis';
 
 // =====================
@@ -123,7 +123,7 @@ function getUserToken() {
 
 async function getTenantAccessToken() {
   const data = await apiRequest('/auth/v3/tenant_access_token/internal', 'POST', {
-    app_id: APP_ID, app_secret: APP_SECRET
+    app_id: APP_ID // app_secret 由 SCF 环境变量注入
   });
   if (data.code === 0) return data.tenant_access_token;
   throw new Error(`获取 Tenant Token 失败: ${data.msg}`);

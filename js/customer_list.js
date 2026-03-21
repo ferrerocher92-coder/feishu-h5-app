@@ -13,7 +13,6 @@
 // 注意：customer_list.html 在加载本脚本之前会先加载 config.js
 const API_BASE = window.CONFIG ? window.CONFIG.API_BASE : 'https://open.feishu.cn/open-apis';
 const APP_ID    = window.CONFIG ? window.CONFIG.APP_ID    : 'cli_a9365221543a5ccc';
-const APP_SECRET = window.CONFIG ? window.CONFIG.APP_SECRET : 'o08J7194FRXuGPffPICd6cHb6gyKWjBY';
 
 // Storage keys (same as api.js for compatibility)
 const STORAGE_KEY_APP_TOKEN = 'customer_bitable_app_token';
