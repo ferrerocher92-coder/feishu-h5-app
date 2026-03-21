@@ -113,7 +113,7 @@
         // 【修改 - 2026-03-21】登录成功跳转和已登录跳转改为使用 CONFIG.APP_BASE 动态生成
         // If already authenticated, redirect to main app
         if (Auth.isAuthenticated() && !Auth.isTokenExpired()) {
-            window.location.href = resolveUrl('../index.html');
+            window.location.href = CONFIG.APP_BASE.replace(/\/$/, '') + '/pages/customer_list.html';
         }
 
         function handleLogin() {
