@@ -42,7 +42,7 @@ function getUserToken() {
   const token = localStorage.getItem(STORAGE_KEY_USER_TOKEN);
   if (!token) {
     // 未登录，跳转到登录页面
-    window.location.href = '/customer-app-h5/pages/login.html';
+    window.location.href = (window.CONFIG?.APP_BASE || '/feishu-h5-app') + '/pages/login.html';
     throw new Error('Not authenticated, redirecting to login...');
   }
   return token;
@@ -81,7 +81,7 @@ async function apiRequest(endpoint, method, body) {
     // token 无效或过期
     if (data.code === 99991663 || data.code === 230001) {
       localStorage.removeItem(STORAGE_KEY_USER_TOKEN);
-      window.location.href = '/customer-app-h5/pages/login.html';
+      window.location.href = (window.CONFIG?.APP_BASE || '/feishu-h5-app') + '/pages/login.html';
     }
     throw new Error(data.msg || `API Error: code=${data.code}`);
   }
