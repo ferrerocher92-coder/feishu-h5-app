@@ -20,7 +20,8 @@ const Auth = {
     AUTH_URL: 'https://open.feishu.cn/open-apis/authen/v1/authorize',
     // 【安全修复 2026-03-21】TOKEN_URL 改为 SCF 代理，不再直连飞书，避免 APP_SECRET 暴露
     TOKEN_URL: 'https://1344246142-c7615ig2lb.ap-guangzhou.tencentscf.com/open-apis/authen/v1/oidc/access_token',
-    USER_INFO_URL: 'https://open.feishu.cn/open-apis/authen/v1/user_info',
+    // 【CORS 修复 2026-03-21】USER_INFO_URL 改为通过 CORS 代理访问，不再直连飞书
+    get USER_INFO_URL() { return `${window.H5_APP_PROXY_URL}/open-apis/authen/v1/user_info`; },
 
     // localStorage keys（与 api.js 的 STORAGE_KEY_USER_TOKEN 保持一致）
     // 【重要 bug 修复】之前是 'feishu_user_access_token'，导致登录后 api.js 读不到 token
