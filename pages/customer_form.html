@@ -409,6 +409,12 @@
     <!-- Scripts -->
     <!-- 【修改 - 2026-03-21】config.js 必须在 customer_form.js 之前加载 -->
     <script src="/feishu-h5-app/js/config.js"></script>
+    <script src="/feishu-h5-app/js/auth.js"></script>
+    <script>
+        if (!Auth.isAuthenticated()) {
+            window.location.href = '../pages/login.html';
+        }
+    </script>
     <script src="/feishu-h5-app/js/customer_form.js"></script>
 </body>
 </html>
