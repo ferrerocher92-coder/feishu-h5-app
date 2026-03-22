@@ -25,6 +25,28 @@
 
 ## 最新里程碑
 
+### ✅ GitHub Pages 路径修复（2026-03-22）
+
+**问题**：登录回调后 404，原因多个路径错误累积
+
+**修复内容**：
+1. `index.html` 重定向路径 `feishu-h5-app/pages/login.html` → `pages/login.html`
+2. `pages/customer_list.html` 补齐缺失的 `api.js` 和 `auth.js` 引用
+3. `pages/customer_list.html` 添加 `?v=2` 版本参数强制刷新 JS 缓存
+4. `pages/callback.html` 跳转路径 `../index.html` → `index.html`
+
+**Git commits**：
+- `98517dc` - 修正 index.html 重定向路径
+- `96cdde0` - 补齐 customer_list.html 缺失的 api.js 和 auth.js 引用
+- `1a7bcca` - 添加版本参数强制刷新JS缓存
+- `c7d1388` - callback.html 跳转路径修正
+
+**验证结果**：
+- ✅ GitHub Pages 主页可访问
+- ✅ 飞书登录授权页正常显示
+- ✅ 用户 Jimmy 授权成功
+- 🧪 callback.html 跳转仍在调试中（当前 404）
+
 ### ✅ 安全修复（2026-03-21）
 **问题**：APP_SECRET 硬编码在前端代码中，严重安全风险
 
@@ -33,13 +55,12 @@
 2. SCF 云函数：新增 `/exchange-token` 接口，环境变量存储 APP_SECRET
 3. `config.js`：移除 APP_SECRET 配置项
 
-**Git commit**：`eb80b0b` - 安全修复：移除前端代码中的 APP_SECRET，改走 SCF 代理换 token
+## 已知问题
 
-**验证结果**：
-- ✅ GitHub Pages 构建成功
-- ✅ auth.js 包含 SCF 代理地址
-- ✅ app_secret 不出现在前端代码
-- 🧪 E2E 测试进行中
+### 🔧 callback.html 跳转 404（调试中）
+- **现象**：飞书授权后回调到 `callback.html`，然后跳转到根目录 `/index.html` 而非 `/feishu-h5-app/index.html`
+- **已尝试**：修改 `callback.html` 第 108 行 `resolveUrl('../index.html')` → `resolveUrl('index.html')`
+- **状态**：commit `c7d1388` 已 push，待验证
 
 ## 腾讯云资源
 
@@ -59,12 +80,14 @@
 
 ## 下一步
 
-1. [ ] E2E 测试完成
-2. [ ] 飞书内嵌应用调试（可选）
-3. [ ] 正式上线
+1. [ ] 修复 callback.html 跳转 404 问题
+2. [ ] 完成 E2E 测试（登录 → 客户列表 → 新增客户）
+3. [ ] 飞书内嵌应用调试（可选）
+4. [ ] 正式上线
 
 ## 历史决策
 
+- **2026-03-22**：修复 GitHub Pages 多处路径错误（index.html、customer_list.html、callback.html）
 - **2026-03-21**：从 Vercel 切换到腾讯云（大陆访问问题）
 - **2026-03-21**：从腾讯云 COS 切换到 GitHub Pages（飞书可信域名要求）
 - **2026-03-21**：从独立 H5 改为飞书内嵌应用方向
