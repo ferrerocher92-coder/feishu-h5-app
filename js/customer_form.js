@@ -133,6 +133,12 @@ async function getTenantAccessToken() {
 // Bitable 操作
 // =====================
 async function getOrCreateBitable() {
+  // 优先使用 CONFIG 中预配置的 Bitable
+  if (window.CONFIG.BITABLE_APP_TOKEN && window.CONFIG.BITABLE_TABLE_ID) {
+    console.log(`[Bitable] 使用CONFIG预配表格: app_token=${window.CONFIG.BITABLE_APP_TOKEN}, table_id=${window.CONFIG.BITABLE_TABLE_ID}`);
+    return { app_token: window.CONFIG.BITABLE_APP_TOKEN, table_id: window.CONFIG.BITABLE_TABLE_ID };
+  }
+
   const savedAppToken = getStorage(STORAGE_KEY_APP_TOKEN);
   const savedTableId  = getStorage(STORAGE_KEY_TABLE_ID);
 

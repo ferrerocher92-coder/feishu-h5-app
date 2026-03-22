@@ -10,6 +10,9 @@ const CONFIG = (function () {
     API_BASE: 'https://open.feishu.cn/open-apis',
     H5_APP_PROXY_URL: 'https://1344246142-c7615ig2lb.ap-guangzhou.tencentscf.com',
     APP_BASE: '/feishu-h5-app/',
+    // Bitable 配置
+    BITABLE_APP_TOKEN: 'T8ifbHgiKarGLLsgExOceVOAnFg',
+    BITABLE_TABLE_ID: 'tbloMvHgMaC9kuBA',
   };
   return defaults;
 })();

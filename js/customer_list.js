@@ -66,6 +66,10 @@ async function apiRequest(endpoint, method = 'GET', body = null, token) {
 }
 
 async function getBitableConfig() {
+  // 优先使用 CONFIG 中预配置的 Bitable
+  if (window.CONFIG.BITABLE_APP_TOKEN && window.CONFIG.BITABLE_TABLE_ID) {
+    return { app_token: window.CONFIG.BITABLE_APP_TOKEN, table_id: window.CONFIG.BITABLE_TABLE_ID };
+  }
   const appToken = localStorage.getItem(STORAGE_KEY_APP_TOKEN);
   const tableId  = localStorage.getItem(STORAGE_KEY_TABLE_ID);
   if (appToken && appToken.length > 5 && tableId && tableId.length > 5) {
