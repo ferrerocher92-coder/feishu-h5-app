@@ -320,7 +320,7 @@ const Router = {
         const token = getUserToken(); // 【Bug2修复 - 2026-03-21】改用本地 getUserToken()
         const params = pageToken ? `?page_token=${pageToken}` : '';
         const response = await fetch(
-            `${CONFIG.API_BASE}/bitable/v1/apps/${app_token}/tables/${table_id}/records${params}`,
+            `${CONFIG.H5_APP_PROXY_URL || 'https://1344246142-c7615ig2lb.ap-guangzhou.tencentscf.com'}/open-apis/bitable/v1/apps/${app_token}/tables/${table_id}/records${params}`,
             {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -560,7 +560,7 @@ const Router = {
     async _getRecord(app_token, table_id, record_id) {
         const token = getUserToken(); // 【Bug2修复 - 2026-03-21】改用本地 getUserToken()
         const response = await fetch(
-            `${CONFIG.API_BASE}/bitable/v1/apps/${app_token}/tables/${table_id}/records/${record_id}`,
+            `${CONFIG.H5_APP_PROXY_URL || 'https://1344246142-c7615ig2lb.ap-guangzhou.tencentscf.com'}/open-apis/bitable/v1/apps/${app_token}/tables/${table_id}/records/${record_id}`,
             {
                 headers: {
                     'Authorization': `Bearer ${token}`,

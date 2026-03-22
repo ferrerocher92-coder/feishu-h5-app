@@ -11,7 +11,7 @@
 // Config（从 js/config.js 读取，不再硬编码）
 // =====================
 // 注意：customer_list.html 在加载本脚本之前会先加载 config.js
-const API_BASE = window.CONFIG ? window.CONFIG.API_BASE : 'https://open.feishu.cn/open-apis';
+const API_BASE = window.H5_APP_PROXY_URL || 'https://1344246142-c7615ig2lb.ap-guangzhou.tencentscf.com';
 const APP_ID    = window.CONFIG ? window.CONFIG.APP_ID    : 'cli_a9365221543a5ccc';
 
 // Storage keys (same as api.js for compatibility)
